@@ -58,7 +58,6 @@ plt.imshow(hybrid)
 plt.show()
 skio.imsave("out/hybrid_derek_nutmeg.png", hybrid)
 
-"""
 # Repeating the above steps in one function
 def hybrid_all(filename1, filename2, sigma1=1, sigma2=1):
     im1 = plt.imread(filename1)/255.
@@ -70,9 +69,9 @@ def hybrid_all(filename1, filename2, sigma1=1, sigma2=1):
     plt.show()
     skio.imsave("out/hybrid_{0}_{1}.png".format(name1, name2), hybrid)
 
-#hybrid_all('wolf.jpg', 'dog.jpg')
+hybrid_all('wolf.jpg', 'dog.jpg')
 hybrid_all('rick.jpg', 'morty.jpg', 1, 0.5)
-"""
+
 
 ## Compute and display Gaussian and Laplacian Pyramids
 ## You also need to supply this function
