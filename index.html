@@ -1,0 +1,412 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Hyun Jae Moon's CS194-26 Project 2</title>
+  <link href="styles/style.css" rel="stylesheet" type="text/css">
+  <style>
+    html {
+      background-color: #e0ffe4;
+    }
+
+    h1 {
+      text-align: center;
+      font-family: 'Georgia';
+      font-size: 40px;
+    }
+
+    h2 {
+      text-align: center;
+      font-family: 'Copperplate';
+      font-size: 30px;
+    }
+
+    p {
+      text-align: left;
+      font-family: 'Times New Roman';
+      font-size: 20px;
+      line-height: 2;
+    }
+
+    div {
+      text-align: center;
+    }
+
+    body {
+      width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px 20px 20px;
+    }
+
+    .column {
+      float: left;
+      width: 30%;
+      padding: 10px;
+    }
+
+    /* Clearfix (clear floats) */
+    .row::after {
+      content: "";
+      clear: both;
+      display: table;
+    }
+
+    table,
+    th,
+    td {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Fun with Filters and Frequencies</h1>
+  <h3 style="text-align: right"> By Hyun Jae Moon </h3>
+
+  <h2> Introduction </h2>
+
+  <p>
+    The goal of this project is to modify the filters and frequencies of image
+    to produce blended/hybrid/sharper images.
+  </p>
+
+  <h2> Part 1: Fun with Filters </h2>
+
+  <h3> Part 1.1: Finite Difference Operator </h3>
+  <p>
+    To extract the edge image, I first convolved the image with dx and dy. Here is
+    the convolved image with dx and dy. This is done by the convolve2d function
+    from scipy.signal.
+  </p>
+
+  <div class="row">
+    <div class="column">
+      <img src="out/gx.png" alt="Gx" style="width:100%">
+      <p style="text-align: center">gx.png: image convolution with dx</p>
+    </div>
+    <div class="column">
+      <img src="out/gy.png" alt="Gy" style="width:100%">
+      <p style="text-align: center">gy.png: image convolution with dy</p>
+    </div>
+  </div>
+  <p>
+    Then I computed the gradient magnitude by np.sqrt(np.sqaure(gx)+np.square(gy)).
+    Finally, I would turn it into an edge image by filtering pixel values
+    that are less than the threshold.
+  </p>
+  <div class="row">
+    <div class="column">
+      <img src="out/mag.png" alt="Mag" style="width:100%">
+      <p style="text-align: center">mag.png: Gradient Magnitude</p>
+    </div>
+    <div class="column">
+      <img src="out/edge.png" alt="Edge" style="width:100%">
+      <p style="text-align: center">edge.png: Edge Image with threshold=0.1</p>
+    </div>
+  </div>
+
+  <h3> Part 1.2: Derivative of Gaussian (DoG) Filter </h3>
+  <p>
+    By utilizing the Gaussian filter, a.k.a. low-pass filter, it would suppress
+    the noise and provide a much smoother edge. From gx and gy in the previous part,
+    we would convolve each with G, a 2D gaussian Kernel. Then, we would compute
+    the magnitude and edge image as we did previously.
+  </p>
+  <div class="row">
+    <div class="column"></div>
+    <div class="column">
+      <img src="out/gauss_edge.png" alt="Gauss_edge" style="width:100%">
+      <p style="text-align: center">gauss_edge.png</p>
+    </div>
+    <div class="column"></div>
+  </div>
+  <p>
+    As you can see, compared to the previous edge.png, the bottom portion of
+    the image has much less noise, and the edges around the person and the camera
+    is much more vivid and clear. It is visually verifiable that the noise
+    has certainly diminished.
+  </p>
+  <p>
+    On the next section, we convolved the 2D gaussian Kernel with dx and dy first,
+    then convolved that with the original image to produce the edge image. Simply put,
+    we are doing all the procedures that we've done, but in a different order. By
+    doing this, we just have to run the convolution a single time by the partial derivative
+    of the kernel, thus having a single convolution procedure.
+  </p>
+  <div class="row">
+    <div class="column"></div>
+    <div class="column">
+      <img src="out/gauss_edge_single.png" alt="Gauss_edge_single" style="width:100%">
+      <p style="text-align: center">gauss_edge_single.png</p>
+    </div>
+    <div class="column"></div>
+  </div>
+  <p>
+    As you can see, there is almost no difference from the previous section, thus,
+    verifying that we get the same result.
+  </p>
+
+  <h2> Part 2: Fun with Frequencies </h2>
+
+  <h3> Part 2.1: Image "Sharpening" </h3>
+
+  <p>
+    In this part, we will be sharpening the image by obtaining the blurred image
+    using the gaussian filter, then use the sharpen the image by using the
+    Unsharp Mask Filter formula from lecture.
+  </p>
+  <p>sharp_image = image + alpha * (image - convolve2d(image, G)) # alpha = 1</p>
+  <h4> taj.jpg </h4>
+  <div class="row">
+    <div class="column">
+      <img src="taj.jpg" alt="Taj" style="width:100%">
+      <p style="text-align: center">Original</p>
+    </div>
+    <div class="column">
+      <img src="out/taj_alpha1_blur.png" alt="Taj_alpha1_blur" style="width:100%">
+      <p style="text-align: center">Blurred</p>
+    </div>
+    <div class="column">
+      <img src="out/taj_alpha1_sharp.png" alt="Taj_alpha1_sharp" style="width:100%">
+      <p style="text-align: center">Sharpened</p>
+    </div>
+  </div>
+  <h4> mario.jpg </h4>
+  <div class="row">
+    <div class="column">
+      <img src="mario.jpg" alt="Mario" style="width:100%">
+      <p style="text-align: center">Original</p>
+    </div>
+    <div class="column">
+      <img src="out/mario_alpha1_blur.png" alt="Mario_alpha1_blur" style="width:100%">
+      <p style="text-align: center">Blurred</p>
+    </div>
+    <div class="column">
+      <img src="out/mario_alpha1_sharp.png" alt="Mario_alpha1_sharp" style="width:100%">
+      <p style="text-align: center">Sharpened</p>
+    </div>
+  </div>
+  <h4> elon.jpg </h4>
+  <div class="row">
+    <div class="column">
+      <img src="elon.jpg" alt="Elon" style="width:100%">
+      <p style="text-align: center">Original</p>
+    </div>
+    <div class="column">
+      <img src="out/elon_alpha1_blur.png" alt="Elon_alpha1_blur" style="width:100%">
+      <p style="text-align: center">Blurred</p>
+    </div>
+    <div class="column">
+      <img src="out/elon_alpha1_sharp.png" alt="Elon_alpha1_sharp" style="width:100%">
+      <p style="text-align: center">Sharpened</p>
+    </div>
+  </div>
+  <p>
+    We can visually observe that the sharpening did indeed occur. Here are some
+    images with different alpha values for elon.jpg.
+  </p>
+  <div class="row">
+    <div class="column">
+      <img src="out/elon_alpha1_sharp.png" alt="Elon_alpha1_sharp" style="width:100%">
+      <p style="text-align: center">alpha=1</p>
+    </div>
+    <div class="column">
+      <img src="out/elon_alpha2_sharp.png" alt="Elon_alpha2_sharp" style="width:100%">
+      <p style="text-align: center">alpha=2</p>
+    </div>
+    <div class="column">
+      <img src="out/elon_alpha3_sharp.png" alt="Elon_alpha3_sharp" style="width:100%">
+      <p style="text-align: center">alpha=3</p>
+    </div>
+  </div>
+
+  <h3> Part 2.2: Hybrid Images </h3>
+
+  <p>
+    In this part, we will create hybrid images by combining the low frequency
+    portion of one image and high frequency portion of the other image. This will
+    eventually lead to a hybrid image with different interpretations at different
+    distance. Firstly, here are the frequency representations of two sample pictures.
+  </p>
+  <div class="row">
+    <div class="column" style="width:40%">
+      <img src="DerekPicture.jpg" alt="DerekPicture" style="width:100%">
+      <p style="text-align: center">DerekPicture.jpg</p>
+    </div>
+    <div class="column" style="width:40%">
+      <img src="out/Derek_freq.png" alt="Derek_freq" style="width:100%">
+      <p style="text-align: center">Frequency representation of DerekPicture.jpg</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column" style="width:40%">
+      <img src="nutmeg.jpg" alt="Nutmeg" style="width:100%">
+      <p style="text-align: center">nutmeg.jpg</p>
+    </div>
+    <div class="column" style="width:40%">
+      <img src="out/nutmeg_freq.png" alt="Nutmeg_freq" style="width:100%">
+      <p style="text-align: center">Frequency representation of nutmeg.jpg</p>
+    </div>
+  </div>
+  <p>
+    Then, we will perform a lowpass filter on DerekPicture.jpg and highpass filter
+    on nutmeg.jpg. The lowpass filter is what we did like in the previous section
+    to produce a blurred image, which is a convolution with a 2D Gaussian kernel.
+    The highpass filter would be the subtraction of the image by the blurred image.
+    Finally, we would combine those two to create a hybrid image.
+  </p>
+  <div class="row">
+    <div class="column">
+      <img src="out/Derek_lowpass.png" alt="Derek_lowpass" style="width:100%">
+      <p style="text-align: center">Low Pass Filter</p>
+    </div>
+    <div class="column">
+      <img src="out/nutmeg_highpass.png" alt="Nutmeg_highpass" style="width:100%">
+      <p style="text-align: center">High Pass Filter</p>
+    </div>
+    <div class="column">
+      <img src="out/hybrid_derek_nutmeg.png" alt="Hybrid_derek_nutmeg" style="width:100%">
+      <p style="text-align: center">Hybrid Image Result</p>
+    </div>
+  </div>
+  <p>
+    As you can see, based on the distance, you might perceieve different images
+    of this hybrid result. Here are some additional hybrid images that I've
+    attempted.
+  </p>
+  <div class="row">
+    <div class="column">
+      <img src="wolf.jpg" alt="Wolf" style="width:100%">
+      <p style="text-align: center">wolf.jpg</p>
+    </div>
+    <div class="column">
+      <img src="dog.jpg" alt="Dog" style="width:100%">
+      <p style="text-align: center">dog.jpg</p>
+    </div>
+    <div class="column">
+      <img src="out/hybrid_wolf_dog.png" alt="Hybrid_wolf_dog" style="width:100%">
+      <p style="text-align: center">Hybrid of wolf and dog</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column">
+      <img src="rick.jpg" alt="Rick" style="width:100%">
+      <p style="text-align: center">rick.jpg</p>
+    </div>
+    <div class="column">
+      <img src="morty.jpg" alt="Morty" style="width:100%">
+      <p style="text-align: center">morty.jpg</p>
+    </div>
+    <div class="column">
+      <img src="out/hybrid_rick_morty.png" alt="Hybrid_rick_morty" style="width:100%">
+      <p style="text-align: center">Hybrid of Rick and Morty</p>
+    </div>
+  </div>
+  <h4> Why did wolf X dog example look bad? </h4>
+  <p style="text-align:center;"><img src="out/hybrid_wolf_dog.png" alt="Hybrid_wolf_dog" style="width:50%"></p>
+  <p>
+    Even if the eyes were aligned, the overall facial anatomy of dogs and wolves
+    are vastly different. If two images were either completely similar or completely
+    different structures, hybrids might be possible. But in this case, the images
+    are sort of same but the details are different. In such case, the hybrid does
+    not look as well as the other examples. However, with closer or farther distances,
+    we can clearly distinguish the two images.
+  </p>
+
+  <h3> Part 2.3: Gaussian and Laplacian Stacks </h3>
+
+  <p>
+    In this part, we will implement Gaussian and Laplacian stacks to prepare
+    for Multi-resolution blending. Here are the 12 images I've recreated by doing
+    laplacian stacks of each image and the blended image at level 0, 2, and 4.
+  </p>
+  <div class="row">
+    <div class="column" style="width:24%;padding:5px">
+      <img src="out2/apple_black_collapse.png" alt="apple_black_collapse" style="width:100%">
+    </div>
+    <div class="column" style="width:24%;padding:5px">
+      <img src="out2/apple_lap1.png" alt="Apple_lap1" style="width:100%">
+    </div>
+    <div class="column" style="width:24%;padding:5px">
+      <img src="out2/apple_lap3.png" alt="Apple_lap3" style="width:100%">
+    </div>
+    <div class="column" style="width:24%;padding:5px">
+      <img src="out2/apple_lap4.png" alt="Apple_lap4" style="width:100%">
+    </div>
+  </div>
+  <div class="row">
+    <div class="column" style="width:24%;padding:5px">
+      <img src="out2/orange_black_collapse.png" alt="Orange_black_collapse" style="width:100%">
+    </div>
+    <div class="column" style="width:24%;padding:5px">
+      <img src="out2/orange_lap1.png" alt="Orange_lap1" style="width:100%">
+    </div>
+    <div class="column" style="width:24%;padding:5px">
+      <img src="out2/orange_lap3.png" alt="Orange_lap3" style="width:100%">
+    </div>
+    <div class="column" style="width:24%;padding:5px">
+      <img src="out2/orange_lap5.png" alt="Orange_lap5" style="width:100%">
+    </div>
+  </div>
+  <div class="row">
+    <div class="column" style="width:24%;padding:5px">
+      <img src="out2/multires_collapse.png" alt="Multires_collapse" style="width:100%">
+    </div>
+    <div class="column" style="width:24%;padding:5px">
+      <img src="out2/oraple_blend1.png" alt="Oraple_blend1" style="width:100%">
+    </div>
+    <div class="column" style="width:24%;padding:5px">
+      <img src="out2/oraple_blend3.png" alt="Oraple_blend3" style="width:100%">
+    </div>
+    <div class="column" style="width:24%;padding:5px">
+      <img src="out2/oraple_blend5.png" alt="Oraple_blend5" style="width:100%">
+    </div>
+  </div>
+
+  <h3> Part 2.4: Multiresolution Blending (a.k.a. the oraple!) </h3>
+  <p>
+    It's Sblended!
+  </p>
+  <p style="text-align: center">multiresolution blending</p>
+  <p style="text-align:center;"><img src="out2/multires_collapse.png" alt="Multires_collapse" style="width:50%"></p>
+  <p>
+    However, this sample image was quite easily aligned to perform blending.
+    I can even raw-perform the alpha blending and get a even better result.
+  </p>
+  <p style="text-align: center">alpha blending</p>
+  <p style="text-align:center;"><img src="out2/apple_orange_hybrid.png" alt="Apple_orange_hybrid" style="width:50%"></p>
+  <p>
+    If the world is indeed perfect and everything is aligned, alpha blending
+    might be the best option. However in real life, gaussian and laplacian stacks
+    are quite flexible to perform image blending. Here are some of my examples:
+  </p>
+  <h4>Example 1 (5 levels)</h4>
+  <div class="row">
+    <div class="column" style="width:49%;padding:5px">
+      <img src="river.jpg" alt="River" style="width:100%">
+      <p style="text-align: center">river.jpg</p>
+    </div>
+    <div class="column" style="width:49%;padding:5px">
+      <img src="lava.jpg" alt="Lava" style="width:100%">
+      <p style="text-align: center">lava.jpg</p>
+    </div>
+  </div>
+  <p style="text-align: center">Blend result: OMG eruption under a bright blue sky???</p>
+  <p style="text-align:center;"><img src="out2/river_lava_collapse.png" alt="River_lava_collapse" style="width:50%"></p>
+  <h4>Example 2 (50 levels)</h4>
+  <div class="row">
+    <div class="column" style="width:49%;padding:5px">
+      <img src="mario.png" alt="Mariojpg" style="width:100%">
+      <p style="text-align: center">mario.jpg</p>
+    </div>
+    <div class="column" style="width:49%;padding:5px">
+      <img src="luigi.png" alt="Luigi" style="width:100%">
+      <p style="text-align: center">luigi.jpg</p>
+    </div>
+  </div>
+  <p style="text-align: center">Blend result: Mari...are you Luigi?</p>
+  <p style="text-align:center;"><img src="out2/mario_luigi_collapse.png" alt="Mario_luigi_collapse" style="width:50%"></p>
+
+</html>
